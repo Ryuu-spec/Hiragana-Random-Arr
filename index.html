@@ -3,10 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arrange Random Hiragana</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600&display=swap" rel="stylesheet">
+    <title>히라가나 오십음도표 빈칸 채우기</title>
+    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600&family=Libre+Baskerville:wght@700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -15,628 +13,638 @@
         }
 
         body {
-            font-family: 'Noto Sans KR', Arial, sans-serif;
-            background: #fdf0eb;
-            padding: 20px;
-            min-height: 100vh;
-            overflow-x: hidden;
+            font-family: 'Klee One', cursive;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            padding: 0;
+            margin: 0;
+            overflow: hidden;
         }
 
         .container {
-            width: 1400px;
-            height: 800px;
-            margin: 0 auto;
-            position: relative;
-            transform-origin: top center;
-        }
-        
-        @media (max-width: 1400px) {
-            .container {
-                transform: scale(calc(100vw / 1400));
-            }
+            background: #2d5a5a;
+            border-radius: 20px;
+            padding: 1.5vh 1.5vw;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 95vw;
+            height: 95vh;
+            max-width: 1920px;
+            max-height: 1080px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
-        /* 헤더 */
         .header {
-            background: #f9ddd0;
-            border-radius: 25px;
-            padding: 18px 35px;
-            text-align: center;
-            margin-bottom: 40px;
+            background: white;
+            border-radius: 15px;
+            padding: 1vh 2vw;
+            margin-bottom: 1.5vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             position: relative;
-            width: 1099px;
-            margin-left: auto;
-            margin-right: auto;
-            box-shadow: 0 4px 0 #e8c4b0, 0 6px 15px rgba(0,0,0,0.1);
+            flex-shrink: 0;
+            min-height: 0;
+        }
+
+        .header-center {
             display: flex;
             align-items: center;
+            gap: 15px;
+        }
+
+        .title {
+            font-size: 2vw;
+            color: #2d5a5a;
+            font-weight: 700;
+            font-family: 'Libre Baskerville', serif;
+            white-space: nowrap;
+        }
+
+        .reset-btn {
+            width: 3vh;
+            height: 3vh;
+            min-width: 30px;
+            min-height: 30px;
+            background: #2d5a5a;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
             justify-content: center;
-            gap: 30px;
+            align-items: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(45, 90, 90, 0.3);
+            flex-shrink: 0;
+        }
+
+        .reset-btn:hover {
+            transform: translateY(-2px) rotate(90deg);
+            box-shadow: 0 6px 20px rgba(45, 90, 90, 0.4);
+        }
+
+        .reset-btn:active {
+            transform: translateY(0) rotate(90deg);
+            box-shadow: 0 2px 10px rgba(45, 90, 90, 0.3);
+        }
+
+        .reset-btn svg {
+            width: 22px;
+            height: 22px;
+            stroke: white;
+            fill: none;
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
         }
 
         .timer {
+            font-size: 1.8vw;
+            color: #2d5a5a;
+            font-weight: 600;
+            font-family: 'Libre Baskerville', serif;
+            white-space: nowrap;
             position: absolute;
-            right: 35px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 20px;
-            font-weight: 700;
-            color: #e86050;
-            min-width: 80px;
-            text-align: right;
+            right: 2vw;
         }
 
-        .header h1 {
-            font-size: 30px;
-            font-weight: 800;
-            color: #222;
-            letter-spacing: 0.5px;
-        }
-        
-        .reset-btn {
-            padding: 6px 20px;
-            background: #e86050;
-            border: none;
-            border-radius: 16px;
-            color: #fff;
-            font-size: 13px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: background 0.2s, transform 0.15s;
-            box-shadow: 0 3px 0 #c84838, 0 5px 10px rgba(232,96,80,0.4);
-        }
-        
-        .reset-btn:hover {
-            background: #d04838;
-            transform: scale(1.05);
-        }
-        
-        .reset-btn:active {
-            transform: scale(0.95);
-        }
-
-        /* 본문 레이아웃 */
-        .content {
+        .game-area {
             display: flex;
-            gap: 24px;
-            align-items: flex-start;
-            justify-content: center;
+            gap: 1.5vw;
+            align-items: stretch;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
         }
 
-        /* ─── 테이블 영역 ─── */
-        .table-container {
+        .left-panel {
+            flex: 2;
+            background: white;
+            border-radius: 15px;
+            padding: 1vh;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            min-height: 0;
+            overflow: hidden;
         }
 
-        /* 자음 행 */
-        .consonants {
-            display: flex;
-            gap: 10px;
-            margin-left: 80px;
-        }
-
-        .consonant {
-            width: 70px;
-            height: 70px;
-            background: #b8d8f0;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 700;
-            color: #2a2a2a;
-            box-shadow: 0 4px 0 #95b8d4, 0 6px 12px rgba(0,0,0,0.15);
-        }
-
-        .consonant.empty {
-            opacity: 0;
-        }
-
-        /* 테이블 그리드 */
-        .table-grid {
-            display: flex;
-            gap: 10px;
-        }
-
-        /* 모음 열 */
-        .vowel-column {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-
-        .vowel {
-            width: 70px;
-            height: 70px;
-            background: #b8d8f0;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 700;
-            color: #2a2a2a;
-            box-shadow: 0 4px 0 #95b8d4, 0 6px 12px rgba(0,0,0,0.15);
-        }
-
-        /* 셀 열 */
-        .cells-column {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+        .hiragana-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5vh;
+            grid-auto-rows: 1fr;
+            flex: 1;
+            min-height: 0;
         }
 
         .cell {
-            width: 70px;
-            height: 70px;
-            background: #fff;
-            border: none;
-            border-radius: 14px;
+            border-radius: 10px;
             display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 32px;
-            font-weight: 600;
-            font-family: 'Klee One', cursive;
-            color: #333;
-            box-shadow: 0 4px 0 #e8e8e8, 0 6px 12px rgba(0,0,0,0.15);
-            transition: all 0.2s;
-        }
-
-        .cell.drag-over {
-            box-shadow: 0 0 0 3px #f0a050, 0 4px 0 #e8e8e8, 0 6px 12px rgba(0,0,0,0.15);
-            background: #fff8f0;
-        }
-
-        .cell.tap-target {
-            box-shadow: 0 0 0 3px #f0a050, 0 4px 0 #e8e8e8, 0 6px 12px rgba(0,0,0,0.15);
-            background: #fff8f0;
+            align-items: center;
+            font-size: 2vw;
             cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .cell.empty {
+            background: white;
+            border: 2px solid #d4b5f0;
         }
 
         .cell.filled {
-            background: #fff;
-            box-shadow: 0 4px 0 #e8e8e8, 0 6px 12px rgba(0,0,0,0.15);
+            background: #e8d4f8;
+            border: 2px solid #d4b5f0;
         }
 
-        .cell.wrong-flash {
-            background: #ffe0d8 !important;
-            box-shadow: 0 0 0 3px #e86050, 0 4px 0 #e8e8e8, 0 6px 12px rgba(0,0,0,0.15) !important;
+        .cell.matched {
+            background: #c8b6e2;
+            border: 2px solid #a89cc9;
+            color: #4a4a4a;
         }
 
-        /* ─── 오른쪽: 카드 + 버튼 ─── */
-        .right-section {
+        .cell.blank {
+            background: white;
+            border: none;
+            cursor: default;
+        }
+
+        .cell.selected {
+            transform: scale(0.95);
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .cell.n-box {
+            background: #c8b6e2;
+            border: 2px solid #a89cc9;
+            color: #4a4a4a;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        .right-panel {
+            flex: 1;
+            background: white;
+            border-radius: 15px;
+            padding: 1vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            gap: 15px;
-            padding-top: 130px;
+            min-height: 0;
+            overflow: hidden;
         }
 
-        /* 고정 네모 틀 — 항상 보이며 글자가 그 안에 표시 */
-        .card-area {
-            width: 115px;
-            height: 115px;
-            background: #fff;
-            border: 3px solid #f0a050;
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 5px 0 #d08838, 0 7px 15px rgba(240,160,80,0.3);
+        .chars-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5vh;
+            grid-auto-rows: 1fr;
+            flex: 1;
+            min-height: 0;
         }
 
-        .char-item {
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            border: none;
-            border-radius: 15px;
+        .char-tile {
+            background: #ffd4d4;
+            border: 2px solid #ffb8b8;
+            border-radius: 10px;
             display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 48px;
+            align-items: center;
+            font-size: 2vw;
+            cursor: pointer;
+            transition: all 0.3s ease;
             font-weight: 600;
-            font-family: 'Klee One', cursive;
-            color: #333;
-            cursor: pointer;
-            transition: background 0.15s, transform 0.15s;
-            user-select: none;
-            -webkit-user-select: none;
+            color: #4a4a4a;
+            min-height: 0;
         }
 
-        .char-item:hover {
-            background: rgba(240,160,80,0.06);
+        .char-tile:hover {
+            background: #ffbbbb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
-        .char-item.selected {
-            background: #fff3e6;
-        }
-
-        .char-item.dragging {
-            opacity: 0.45;
-        }
-
-        /* 버튼 */
-        .shuffle-btn {
-            width: 58px;
-            height: 58px;
-            background: #f0a050;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            transition: background 0.2s, transform 0.15s;
-            box-shadow: 0 4px 0 #d08838, 0 6px 15px rgba(240,160,80,0.4);
-        }
-
-        .shuffle-btn:hover {
-            background: #e08a3a;
-            transform: scale(1.08);
-        }
-
-        .shuffle-btn:active {
+        .char-tile:active {
             transform: scale(0.95);
+        }
+
+        .char-tile.used {
+            opacity: 0.3;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .char-tile.selected {
+            transform: scale(0.95);
+            box-shadow: inset 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        @media (max-width: 1200px) {
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                padding: 1.5vh 2vw;
+            }
+            
+            .timer {
+                position: static;
+            }
+        }
+
+        .confetti {
+            position: fixed;
+            width: 12px;
+            height: 12px;
+            top: -10px;
+            z-index: 9999;
+            pointer-events: none;
+            border-radius: 2px;
+        }
+
+        @keyframes confetti-fall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Arrange Random Hiragana</h1>
+            <div class="header-center">
+                <h1 class="title">히라가나 오십음도표 빈칸 채우기</h1>
+                <button class="reset-btn" onclick="resetGame()">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                    </svg>
+                </button>
+            </div>
             <div class="timer" id="timer">00:00</div>
         </div>
 
-        <div class="content">
-            <div class="table-container">
-                <div class="consonants" id="consonants"></div>
-                <div class="table-grid" id="tableGrid"></div>
+        <div class="game-area">
+            <div class="left-panel">
+                <div class="hiragana-grid" id="grid"></div>
             </div>
 
-            <div class="right-section">
-                <button class="reset-btn" id="resetBtn">초기화</button>
-                <div class="card-area" id="cardArea"></div>
-                <button class="shuffle-btn" id="shuffleBtn" title="패스 (나중에 다시)">👆</button>
+            <div class="right-panel">
+                <div class="chars-grid" id="chars"></div>
             </div>
         </div>
     </div>
 
     <script>
-        const hiragana = {
-            consonants: ['A','K','S','T','N','H','M','Y','R','W',''],
-            vowels: ['a','i','u','e','o'],
-            chars: {
-                'A': ['あ','い','う','え','お'],
-                'K': ['か','き','く','け','こ'],
-                'S': ['さ','し','す','せ','そ'],
-                'T': ['た','ち','つ','て','と'],
-                'N': ['な','に','ぬ','ね','の'],
-                'H': ['は','ひ','ふ','へ','ほ'],
-                'M': ['ま','み','む','め','も'],
-                'Y': ['や','','ゆ','','よ'],
-                'R': ['ら','り','る','れ','ろ'],
-                'W': ['わ','','','','を'],
-                '':  ['','','','','ん']
-            }
-        };
+        // 사운드 생성 함수들 (Ka.html에서 가져옴)
+        function playCorrectSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 523.25; // C5
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
 
-        let draggedElement = null;
-        let remainingChars  = [];
-        let gridCells       = {};
-        let selectedCard    = null;
-        let skippedChars    = [];  // 패스한 글자들
-        let wrongChars      = [];  // 틀린 글자들
-        let timerInterval   = null;  // 타이머 인터벌
-        let timerSeconds    = 0;     // 경과 시간 (초)
-        let timerStarted    = false; // 타이머 시작 여부
-        let totalChars      = 0;     // 전체 문자 개수
-        let completedChars  = 0;     // 완료한 문자 개수
+        function playIncorrectSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 200; // Lower tone
+            oscillator.type = 'sawtooth';
+            
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.15);
+        }
 
-        // ─── 초기화 ───
-        function initializeConsonants() {
-            const container = document.getElementById('consonants');
-            hiragana.consonants.forEach(c => {
-                const el = document.createElement('div');
-                el.className = 'consonant' + (c === '' ? ' empty' : '');
-                el.textContent = c;
-                container.appendChild(el);
+        function playCelebrationSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C, E, G, C
+            
+            notes.forEach((freq, index) => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = freq;
+                oscillator.type = 'sine';
+                
+                const startTime = audioContext.currentTime + (index * 0.15);
+                gainNode.gain.setValueAtTime(0.3, startTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
+                
+                oscillator.start(startTime);
+                oscillator.stop(startTime + 0.4);
             });
         }
 
-        function initializeTable() {
-            const grid = document.getElementById('tableGrid');
+        function createConfetti() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#a29bfe', '#fd79a8'];
+            const confettiCount = 100;
+            const shapes = ['●', '■', '★'];
 
-            const vowelCol = document.createElement('div');
-            vowelCol.className = 'vowel-column';
-            hiragana.vowels.forEach(v => {
-                const el = document.createElement('div');
-                el.className = 'vowel';
-                el.textContent = v;
-                vowelCol.appendChild(el);
+            for (let i = 0; i < confettiCount; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.color = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.fontSize = (Math.random() * 15 + 12) + 'px';
+                confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+                confetti.style.animation = 'confetti-fall linear forwards';
+                
+                document.body.appendChild(confetti);
+
+                setTimeout(() => {
+                    confetti.remove();
+                }, 6000);
+            }
+        }
+
+        // 히라가나 50음도 전체 구조
+        const fullHiraganaTable = [
+            ['あ', 'い', 'う', 'え', 'お'],           // あ행
+            ['か', 'き', 'く', 'け', 'こ'],           // か행
+            ['さ', 'し', 'す', 'せ', 'そ'],           // さ행
+            ['た', 'ち', 'つ', 'て', 'と'],           // た행
+            ['な', 'に', 'ぬ', 'ね', 'の'],           // な행
+            ['は', 'ひ', 'ふ', 'へ', 'ほ'],           // は행
+            ['ま', 'み', 'む', 'め', 'も'],           // ま행
+            ['や', 'blank', 'ゆ', 'blank', 'よ'],     // や행
+            ['ら', 'り', 'る', 'れ', 'ろ'],           // ら행
+            ['わ', 'blank', 'blank', 'blank', 'を', 'ん-box']  // わ행
+        ];
+
+        // 배열 셔플 함수 (Fisher-Yates shuffle)
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        // 랜덤으로 50음도표 배치를 생성하는 함수
+        function generateRandomLayout() {
+            // 모든 실제 문자들의 위치를 수집
+            const allPositions = [];
+            fullHiraganaTable.forEach((row, rowIndex) => {
+                row.forEach((char, colIndex) => {
+                    if (char !== 'blank' && char !== 'ん-box') {
+                        allPositions.push({ row: rowIndex, col: colIndex, char: char });
+                    }
+                });
             });
-            grid.appendChild(vowelCol);
 
-            hiragana.consonants.forEach(con => {
-                const col = document.createElement('div');
-                col.className = 'cells-column';
+            // 랜덤하게 섞기
+            const shuffledPositions = shuffleArray(allPositions);
+            
+            // 총 45개 중 27개는 보이기, 18개는 숨기기
+            const visibleCount = 27;
+            const hiddenPositions = shuffledPositions.slice(visibleCount);
+            
+            // 새로운 테이블과 정답 맵 생성
+            const newTable = fullHiraganaTable.map(row => [...row]);
+            const newAnswerMap = {};
+            const newCharsList = [];
+            
+            hiddenPositions.forEach(pos => {
+                newTable[pos.row][pos.col] = '';  // 빈칸으로 만들기
+                newAnswerMap[`${pos.row}-${pos.col}`] = pos.char;  // 정답 맵에 추가
+                newCharsList.push(pos.char);  // 오른쪽 패널에 추가할 문자
+            });
+            
+            return { table: newTable, answerMap: newAnswerMap, charsList: newCharsList };
+        }
 
-                hiragana.vowels.forEach((_, vi) => {
-                    const char = hiragana.chars[con][vi];
+        let currentLayout = generateRandomLayout();
+        let hiraganaTable = currentLayout.table;
+        let answerMap = currentLayout.answerMap;
+        let charsListOriginal = currentLayout.charsList;
+
+
+        let selectedCell = null;
+        let selectedChar = null;
+        let startTime = null;
+        let timerInterval = null;
+        let usedChars = new Set();
+        let isTimerStarted = false;
+
+        function initGame() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+
+            // 왼쪽 그리드 생성
+            hiraganaTable.forEach((row, rowIndex) => {
+                row.forEach((char, colIndex) => {
                     const cell = document.createElement('div');
                     cell.className = 'cell';
-
-                    if (char) {
-                        cell.dataset.correct = char;
-                        cell.addEventListener('dragover',  handleDragOver);
-                        cell.addEventListener('dragleave', handleDragLeave);
-                        cell.addEventListener('drop',      handleDrop);
-                        cell.addEventListener('click',     handleCellClick);
-                        gridCells[char] = cell;
+                    
+                    if (char === 'blank') {
+                        // 완전히 비어있는 칸 (배경 없음)
+                        cell.classList.add('blank');
+                    } else if (char === 'ん-box') {
+                        // ん 전용 박스
+                        cell.classList.add('filled', 'n-box');
+                        cell.textContent = 'ん';
+                    } else if (char === '') {
+                        // 빈칸 (채워야 할 칸)
+                        cell.classList.add('empty');
+                        cell.dataset.row = rowIndex;
+                        cell.dataset.col = colIndex;
+                        cell.addEventListener('click', () => selectCell(cell));
                     } else {
-                        cell.style.opacity       = '0';
-                        cell.style.pointerEvents = 'none';
+                        // 이미 채워진 칸
+                        cell.classList.add('filled', 'matched');
+                        cell.textContent = char;
                     }
-                    col.appendChild(cell);
+                    
+                    grid.appendChild(cell);
                 });
-                grid.appendChild(col);
             });
+
+            // 오른쪽 문자 패널 생성 (랜덤 셔플) - 항상 랜덤으로 섞임
+            const charsPanel = document.getElementById('chars');
+            charsPanel.innerHTML = '';
+
+            const charsList = shuffleArray(charsListOriginal);  // 매번 랜덤으로 섞기
+
+            charsList.forEach(char => {
+                const tile = document.createElement('div');
+                tile.className = 'char-tile';
+                tile.textContent = char;
+                tile.dataset.char = char;
+                tile.addEventListener('click', () => selectCharTile(tile, char));
+                charsPanel.appendChild(tile);
+            });
+
+            // 타이머는 첫 클릭 시 시작됨
         }
 
-        function initializeCharacters() {
-            const all = [];
-            hiragana.consonants.forEach(con => {
-                hiragana.chars[con].forEach(c => { if (c) all.push(c); });
-            });
-            for (let i = all.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [all[i], all[j]] = [all[j], all[i]];
+        function selectCell(cell) {
+            if (cell.classList.contains('matched')) return;
+
+            // 첫 클릭 시 타이머 시작
+            if (!isTimerStarted) {
+                startTimer();
+                isTimerStarted = true;
             }
-            remainingChars = all;
-            totalChars = all.length;
+
+            // 이전 선택 해제
+            if (selectedCell && selectedCell !== cell) {
+                selectedCell.classList.remove('selected');
+            }
+
+            // 새로운 셀 선택
+            selectedCell = cell;
+            cell.classList.add('selected');
+
+            // 이미 문자가 선택되어 있으면 매칭 시도
+            if (selectedChar) {
+                tryMatch();
+            }
         }
 
-        // ─── 타이머 함수들 ───
+        function selectCharTile(tile, char) {
+            if (tile.classList.contains('used')) return;
+
+            // 첫 클릭 시 타이머 시작
+            if (!isTimerStarted) {
+                startTimer();
+                isTimerStarted = true;
+            }
+
+            // 이전 선택 해제
+            const previousSelected = document.querySelector('.char-tile.selected');
+            if (previousSelected && previousSelected !== tile) {
+                previousSelected.classList.remove('selected');
+            }
+
+            // 새로운 문자 선택
+            selectedChar = { tile, char };
+            tile.classList.add('selected');
+
+            // 이미 셀이 선택되어 있으면 매칭 시도
+            if (selectedCell) {
+                tryMatch();
+            }
+        }
+
+        function tryMatch() {
+            const row = selectedCell.dataset.row;
+            const col = selectedCell.dataset.col;
+            const key = `${row}-${col}`;
+
+            // 정답 확인
+            if (answerMap[key] === selectedChar.char) {
+                // 정답! - 매칭 성공 사운드 재생
+                playCorrectSound();
+                selectedCell.textContent = selectedChar.char;
+                selectedCell.classList.remove('empty', 'selected');
+                selectedCell.classList.add('matched');
+                selectedChar.tile.classList.add('used');
+                selectedChar.tile.classList.remove('selected');
+                usedChars.add(selectedChar.char);
+
+                // 선택 초기화
+                selectedCell = null;
+                selectedChar = null;
+
+                // 완성 체크
+                checkComplete();
+            } else {
+                // 오답 - 실패 사운드 재생 및 흔들기 애니메이션
+                playIncorrectSound();
+                selectedCell.classList.add('shake');
+                selectedChar.tile.classList.add('shake');
+
+                setTimeout(() => {
+                    selectedCell.classList.remove('shake', 'selected');
+                    selectedChar.tile.classList.remove('shake', 'selected');
+                    selectedCell = null;
+                    selectedChar = null;
+                }, 500);
+            }
+        }
+
+        function checkComplete() {
+            const emptyCells = document.querySelectorAll('.cell.empty');
+            if (emptyCells.length === 0) {
+                stopTimer();
+                // 모두 성공했을 때 축하 사운드 및 색종이 효과
+                playCelebrationSound();
+                createConfetti();
+            }
+        }
+
         function startTimer() {
-            if (timerStarted) return;
-            timerStarted = true;
-            timerSeconds = 0;
-            updateTimerDisplay();
-            timerInterval = setInterval(() => {
-                timerSeconds++;
-                updateTimerDisplay();
-            }, 1000);
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+        }
+
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            const minutes = Math.floor(elapsed / 60);
+            const seconds = elapsed % 60;
+            document.getElementById('timer').textContent = 
+                `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
         }
 
         function stopTimer() {
-            if (timerInterval) {
-                clearInterval(timerInterval);
-                timerInterval = null;
-            }
+            clearInterval(timerInterval);
         }
 
-        function resetTimer() {
-            stopTimer();
-            timerStarted = false;
-            timerSeconds = 0;
-            updateTimerDisplay();
-        }
-
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timerSeconds / 60);
-            const seconds = timerSeconds % 60;
-            const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            document.getElementById('timer').textContent = display;
-        }
-
-        // ─── 카드 표시 (하나씩) ───
-        function showNextCard() {
-            if (remainingChars.length === 0) {
-                // 패스했거나 틀린 글자가 있으면 다시 추가
-                if (skippedChars.length > 0 || wrongChars.length > 0) {
-                    const retryChars = [...skippedChars, ...wrongChars];
-                    // 셔플
-                    for (let i = retryChars.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [retryChars[i], retryChars[j]] = [retryChars[j], retryChars[i]];
-                    }
-                    remainingChars = retryChars;
-                    skippedChars = [];
-                    wrongChars = [];
-                    alert('패스했거나 틀린 문자들을 다시 시작합니다! 💪');
-                } else {
-                    alert('모든 문자가 완료되었습니다! 🎉');
-                    return;
-                }
-            }
-            const area = document.getElementById('cardArea');
-            area.innerHTML = '';
-            deselectCard();
-
-            const char = remainingChars.shift();
-            const card = document.createElement('div');
-            card.className   = 'char-item';
-            card.textContent = char;
-            card.draggable   = true;
-            card.dataset.char = char;
-            card.dataset.char = char;
-
-            card.addEventListener('dragstart', handleDragStart);
-            card.addEventListener('dragend',   handleDragEnd);
-            card.addEventListener('click',     handleCardClick);
-
-            area.appendChild(card);
-        }
-
-        // ─── 마우스 드래그 ───
-        function handleDragStart(e) {
-            draggedElement = e.currentTarget;
-            draggedElement.classList.add('dragging');
-            e.dataTransfer.effectAllowed = 'move';
-            e.dataTransfer.setData('text/plain', draggedElement.dataset.char);
-        }
-
-        function handleDragEnd(e) {
-            e.currentTarget.classList.remove('dragging');
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.currentTarget.classList.add('drag-over');
-        }
-
-        function handleDragLeave(e) {
-            e.currentTarget.classList.remove('drag-over');
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            const cell = e.currentTarget;
-            cell.classList.remove('drag-over');
-            if (draggedElement) {
-                attemptPlace(draggedElement, cell);
-                draggedElement = null;
-            }
-        }
-
-        // ─── 탭 선택 ───
-        function handleCardClick(e) {
-            const card = e.currentTarget;
-            if (selectedCard === card) { deselectCard(); return; }
-
-            deselectCard();
-            selectedCard = card;
-            card.classList.add('selected');
-
-            Object.values(gridCells).forEach(cell => {
-                if (!cell.dataset.placed) cell.classList.add('tap-target');
-            });
-        }
-
-        function handleCellClick(e) {
-            const cell = e.currentTarget;
-            if (!selectedCard)       return;
-            if (cell.dataset.placed) return;
-
-            attemptPlace(selectedCard, cell);
-            deselectCard();
-        }
-
-        function deselectCard() {
-            if (selectedCard) {
-                selectedCard.classList.remove('selected');
-                selectedCard = null;
-            }
-            Object.values(gridCells).forEach(cell => cell.classList.remove('tap-target'));
-        }
-
-        // ─── 배치 시도 ───
-        function attemptPlace(source, targetCell) {
-            const dropped = source.dataset.char;
-            const correct = targetCell.dataset.correct;
-
-            if (dropped === correct) {
-                targetCell.textContent    = dropped;
-                targetCell.classList.add('filled');
-                targetCell.dataset.placed = dropped;
-                completedChars++;
-                
-                // wrongChars와 skippedChars에서 해당 문자 제거
-                const wrongIndex = wrongChars.indexOf(dropped);
-                if (wrongIndex > -1) {
-                    wrongChars.splice(wrongIndex, 1);
-                }
-                const skippedIndex = skippedChars.indexOf(dropped);
-                if (skippedIndex > -1) {
-                    skippedChars.splice(skippedIndex, 1);
-                }
-                
-                // remainingChars에서도 동일한 문자 모두 제거
-                remainingChars = remainingChars.filter(c => c !== dropped);
-                
-                // 카드 글자만 제거, 네모 틀 유지
-                document.getElementById('cardArea').innerHTML = '';
-                
-                // 모든 문자를 완료했는지 체크
-                if (completedChars === totalChars) {
-                    stopTimer();
-                    const minutes = Math.floor(timerSeconds / 60);
-                    const seconds = timerSeconds % 60;
-                    setTimeout(() => {
-                        alert(`🎉 완료! 소요 시간: ${minutes}분 ${seconds}초`);
-                    }, 300);
-                } else {
-                    // 다음 카드 표시
-                    showNextCard();
-                }
-            } else {
-                // 틀린 글자는 wrongChars에 추가
-                if (!wrongChars.includes(dropped)) {
-                    wrongChars.push(dropped);
-                }
-                targetCell.classList.add('wrong-flash');
-                setTimeout(() => targetCell.classList.remove('wrong-flash'), 350);
-            }
-        }
-        
-        // ─── 패스 버튼 클릭 시 현재 글자를 skippedChars에 추가 ───
-        function skipCurrentChar() {
-            // 첫 번째 클릭 시 타이머 시작
-            if (!timerStarted) {
-                startTimer();
-            }
-            
-            const currentCard = document.querySelector('.char-item');
-            if (currentCard) {
-                const char = currentCard.dataset.char;
-                if (!skippedChars.includes(char)) {
-                    skippedChars.push(char);
-                }
-            }
-            // 카드가 있든 없든 다음 카드 표시
-            showNextCard();
-        }
-        
-        // ─── 초기화 함수 ───
         function resetGame() {
-            // 모든 배치된 글자 제거
-            Object.values(gridCells).forEach(cell => {
-                cell.textContent = '';
-                cell.classList.remove('filled');
-                delete cell.dataset.placed;
-            });
+            selectedCell = null;
+            selectedChar = null;
+            usedChars.clear();
+            isTimerStarted = false;
+            if (timerInterval) clearInterval(timerInterval);
+            document.getElementById('timer').textContent = '00:00';
             
-            // 배열 초기화
-            skippedChars = [];
-            wrongChars = [];
-            remainingChars = [];
-            completedChars = 0;
+            // 새로운 랜덤 배치 생성
+            currentLayout = generateRandomLayout();
+            hiraganaTable = currentLayout.table;
+            answerMap = currentLayout.answerMap;
+            charsListOriginal = currentLayout.charsList;
             
-            // 타이머 초기화
-            resetTimer();
-            
-            // 카드 영역 비우기
-            document.getElementById('cardArea').innerHTML = '';
-            
-            // 문자 재초기화
-            initializeCharacters();
-            
-            alert('초기화되었습니다! 🔄\n손가락 버튼을 눌러 시작하세요.');
+            initGame();
         }
 
-        // ─── 시작 ───
-        document.getElementById('shuffleBtn').addEventListener('click', skipCurrentChar);
-        document.getElementById('resetBtn').addEventListener('click', resetGame);
-
-        initializeConsonants();
-        initializeTable();
-        initializeCharacters();
-        // 첫 카드는 손가락 버튼을 눌렀을 때 표시
+        // 게임 시작 - 첫 로딩시에도 랜덤으로 배치됨
+        initGame();
     </script>
 </body>
 </html>
