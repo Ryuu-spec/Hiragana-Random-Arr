@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arrange Random Hiragana</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans KR', Arial, sans-serif;
+            background: #fdf0eb;
+            padding: 20px;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 1400px;
+            height: 800px;
+            margin: 0 auto;
+            position: relative;
+            transform-origin: top center;
+        }
+        
+        @media (max-width: 1400px) {
+            .container {
+                transform: scale(calc(100vw / 1400));
+            }
+        }
+
+        /* 헤더 */
+        .header {
+            background: #f9ddd0;
+            border-radius: 25px;
+            padding: 18px 35px;
+            text-align: center;
+            margin-bottom: 40px;
+            position: relative;
+            width: 1099px;
+            margin-left: auto;
+            margin-right: auto;
+            box-shadow: 0 4px 0 #e8c4b0, 0 6px 15px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .timer {
+            position: absolute;
+            right: 35px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 20px;
+            font-weight: 700;
+            color: #e86050;
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .header h1 {
+            font-size: 30px;
+            font-weight: 800;
+            color: #222;
+            letter-spacing: 0.5px;
+        }
+        
+        .reset-btn {
+            padding: 6px 20px;
+            background: #e86050;
+            border: none;
+            border-radius: 16px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.15s;
+            box-shadow: 0 3px 0 #c84838, 0 5px 10px rgba(232,96,80,0.4);
+        }
+        
+        .reset-btn:hover {
+            background: #d04838;
+            transform: scale(1.05);
+        }
+        
+        .reset-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* 본문 레이아웃 */
+        .content {
+            display: flex;
+            gap: 24px;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        /* ─── 테이블 영역 ─── */
+        .table-container {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        /* 자음 행 */
+        .consonants {
+            display: flex;
+            gap: 10px;
+            margin-left: 80px;
+        }
+
+        .consonant {
+            width: 70px;
+            height: 70px;
+            background: #b8d8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: #2a2a2a;
+            box-shadow: 0 4px 0 #95b8d4, 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .consonant.empty {
+            opacity: 0;
+        }
+
+        /* 테이블 그리드 */
+        .table-grid {
+            display: flex;
+            gap: 10px;
+        }
+
+        /* 모음 열 */
+        .vowel-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .vowel {
+            width: 70px;
+            height: 70px;
+            background: #b8d8f0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: #2a2a2a;
+            box-shadow: 0 4px 0 #95b8d4, 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        /* 셀 열 */
+        .cells-column {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .cell {
+            width: 70px;
+            height: 70px;
+            background: #fff;
+            border: none;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 600;
+            font-family: 'Klee One', cursive;
+            color: #333;
+            box-shadow: 0 4px 0 #e8e8e8, 0 6px 12px rgba(0,0,0,0.15);
+            transition: all 0.2s;
+        }
+
+        .cell.drag-over {
+            box-shadow: 0 0 0 3px #f0a050, 0 4px 0 #e8e8e8, 0 6px 12px rgba(0,0,0,0.15);
+            background: #fff8f0;
+        }
+
+        .cell.tap-target {
+            box-shadow: 0 0 0 3px #f0a050, 0 4px 0 #e8e8e8, 0 6px 12px rgba(0,0,0,0.15);
+            background: #fff8f0;
+            cursor: pointer;
+        }
+
+        .cell.filled {
+            background: #fff;
+            box-shadow: 0 4px 0 #e8e8e8, 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .cell.wrong-flash {
+            background: #ffe0d8 !important;
+            box-shadow: 0 0 0 3px #e86050, 0 4px 0 #e8e8e8, 0 6px 12px rgba(0,0,0,0.15) !important;
+        }
+
+        /* ─── 오른쪽: 카드 + 버튼 ─── */
+        .right-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding-top: 130px;
+        }
+
+        /* 고정 네모 틀 — 항상 보이며 글자가 그 안에 표시 */
+        .card-area {
+            width: 115px;
+            height: 115px;
+            background: #fff;
+            border: 3px solid #f0a050;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 0 #d08838, 0 7px 15px rgba(240,160,80,0.3);
+        }
+
+        .char-item {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            border: none;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            font-weight: 600;
+            font-family: 'Klee One', cursive;
+            color: #333;
+            cursor: pointer;
+            transition: background 0.15s, transform 0.15s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .char-item:hover {
+            background: rgba(240,160,80,0.06);
+        }
+
+        .char-item.selected {
+            background: #fff3e6;
+        }
+
+        .char-item.dragging {
+            opacity: 0.45;
+        }
+
+        /* 버튼 */
+        .shuffle-btn {
+            width: 58px;
+            height: 58px;
+            background: #f0a050;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            transition: background 0.2s, transform 0.15s;
+            box-shadow: 0 4px 0 #d08838, 0 6px 15px rgba(240,160,80,0.4);
+        }
+
+        .shuffle-btn:hover {
+            background: #e08a3a;
+            transform: scale(1.08);
+        }
+
+        .shuffle-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Arrange Random Hiragana</h1>
+            <div class="timer" id="timer">00:00</div>
+        </div>
+
+        <div class="content">
+            <div class="table-container">
+                <div class="consonants" id="consonants"></div>
+                <div class="table-grid" id="tableGrid"></div>
+            </div>
+
+            <div class="right-section">
+                <button class="reset-btn" id="resetBtn">초기화</button>
+                <div class="card-area" id="cardArea"></div>
+                <button class="shuffle-btn" id="shuffleBtn" title="패스 (나중에 다시)">👆</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const hiragana = {
+            consonants: ['A','K','S','T','N','H','M','Y','R','W',''],
+            vowels: ['a','i','u','e','o'],
+            chars: {
+                'A': ['あ','い','う','え','お'],
+                'K': ['か','き','く','け','こ'],
+                'S': ['さ','し','す','せ','そ'],
+                'T': ['た','ち','つ','て','と'],
+                'N': ['な','に','ぬ','ね','の'],
+                'H': ['は','ひ','ふ','へ','ほ'],
+                'M': ['ま','み','む','め','も'],
+                'Y': ['や','','ゆ','','よ'],
+                'R': ['ら','り','る','れ','ろ'],
+                'W': ['わ','','','','を'],
+                '':  ['','','','','ん']
+            }
+        };
+
+        let draggedElement = null;
+        let remainingChars  = [];
+        let gridCells       = {};
+        let selectedCard    = null;
+        let skippedChars    = [];  // 패스한 글자들
+        let wrongChars      = [];  // 틀린 글자들
+        let timerInterval   = null;  // 타이머 인터벌
+        let timerSeconds    = 0;     // 경과 시간 (초)
+        let timerStarted    = false; // 타이머 시작 여부
+        let totalChars      = 0;     // 전체 문자 개수
+        let completedChars  = 0;     // 완료한 문자 개수
+
+        // ─── 초기화 ───
+        function initializeConsonants() {
+            const container = document.getElementById('consonants');
+            hiragana.consonants.forEach(c => {
+                const el = document.createElement('div');
+                el.className = 'consonant' + (c === '' ? ' empty' : '');
+                el.textContent = c;
+                container.appendChild(el);
+            });
+        }
+
+        function initializeTable() {
+            const grid = document.getElementById('tableGrid');
+
+            const vowelCol = document.createElement('div');
+            vowelCol.className = 'vowel-column';
+            hiragana.vowels.forEach(v => {
+                const el = document.createElement('div');
+                el.className = 'vowel';
+                el.textContent = v;
+                vowelCol.appendChild(el);
+            });
+            grid.appendChild(vowelCol);
+
+            hiragana.consonants.forEach(con => {
+                const col = document.createElement('div');
+                col.className = 'cells-column';
+
+                hiragana.vowels.forEach((_, vi) => {
+                    const char = hiragana.chars[con][vi];
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+
+                    if (char) {
+                        cell.dataset.correct = char;
+                        cell.addEventListener('dragover',  handleDragOver);
+                        cell.addEventListener('dragleave', handleDragLeave);
+                        cell.addEventListener('drop',      handleDrop);
+                        cell.addEventListener('click',     handleCellClick);
+                        gridCells[char] = cell;
+                    } else {
+                        cell.style.opacity       = '0';
+                        cell.style.pointerEvents = 'none';
+                    }
+                    col.appendChild(cell);
+                });
+                grid.appendChild(col);
+            });
+        }
+
+        function initializeCharacters() {
+            const all = [];
+            hiragana.consonants.forEach(con => {
+                hiragana.chars[con].forEach(c => { if (c) all.push(c); });
+            });
+            for (let i = all.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [all[i], all[j]] = [all[j], all[i]];
+            }
+            remainingChars = all;
+            totalChars = all.length;
+        }
+
+        // ─── 타이머 함수들 ───
+        function startTimer() {
+            if (timerStarted) return;
+            timerStarted = true;
+            timerSeconds = 0;
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        function resetTimer() {
+            stopTimer();
+            timerStarted = false;
+            timerSeconds = 0;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timerSeconds / 60);
+            const seconds = timerSeconds % 60;
+            const display = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            document.getElementById('timer').textContent = display;
+        }
+
+        // ─── 카드 표시 (하나씩) ───
+        function showNextCard() {
+            if (remainingChars.length === 0) {
+                // 패스했거나 틀린 글자가 있으면 다시 추가
+                if (skippedChars.length > 0 || wrongChars.length > 0) {
+                    const retryChars = [...skippedChars, ...wrongChars];
+                    // 셔플
+                    for (let i = retryChars.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [retryChars[i], retryChars[j]] = [retryChars[j], retryChars[i]];
+                    }
+                    remainingChars = retryChars;
+                    skippedChars = [];
+                    wrongChars = [];
+                    alert('패스했거나 틀린 문자들을 다시 시작합니다! 💪');
+                } else {
+                    alert('모든 문자가 완료되었습니다! 🎉');
+                    return;
+                }
+            }
+            const area = document.getElementById('cardArea');
+            area.innerHTML = '';
+            deselectCard();
+
+            const char = remainingChars.shift();
+            const card = document.createElement('div');
+            card.className   = 'char-item';
+            card.textContent = char;
+            card.draggable   = true;
+            card.dataset.char = char;
+            card.dataset.char = char;
+
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('dragend',   handleDragEnd);
+            card.addEventListener('click',     handleCardClick);
+
+            area.appendChild(card);
+        }
+
+        // ─── 마우스 드래그 ───
+        function handleDragStart(e) {
+            draggedElement = e.currentTarget;
+            draggedElement.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+            e.dataTransfer.setData('text/plain', draggedElement.dataset.char);
+        }
+
+        function handleDragEnd(e) {
+            e.currentTarget.classList.remove('dragging');
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const cell = e.currentTarget;
+            cell.classList.remove('drag-over');
+            if (draggedElement) {
+                attemptPlace(draggedElement, cell);
+                draggedElement = null;
+            }
+        }
+
+        // ─── 탭 선택 ───
+        function handleCardClick(e) {
+            const card = e.currentTarget;
+            if (selectedCard === card) { deselectCard(); return; }
+
+            deselectCard();
+            selectedCard = card;
+            card.classList.add('selected');
+
+            Object.values(gridCells).forEach(cell => {
+                if (!cell.dataset.placed) cell.classList.add('tap-target');
+            });
+        }
+
+        function handleCellClick(e) {
+            const cell = e.currentTarget;
+            if (!selectedCard)       return;
+            if (cell.dataset.placed) return;
+
+            attemptPlace(selectedCard, cell);
+            deselectCard();
+        }
+
+        function deselectCard() {
+            if (selectedCard) {
+                selectedCard.classList.remove('selected');
+                selectedCard = null;
+            }
+            Object.values(gridCells).forEach(cell => cell.classList.remove('tap-target'));
+        }
+
+        // ─── 배치 시도 ───
+        function attemptPlace(source, targetCell) {
+            const dropped = source.dataset.char;
+            const correct = targetCell.dataset.correct;
+
+            if (dropped === correct) {
+                targetCell.textContent    = dropped;
+                targetCell.classList.add('filled');
+                targetCell.dataset.placed = dropped;
+                completedChars++;
+                
+                // wrongChars와 skippedChars에서 해당 문자 제거
+                const wrongIndex = wrongChars.indexOf(dropped);
+                if (wrongIndex > -1) {
+                    wrongChars.splice(wrongIndex, 1);
+                }
+                const skippedIndex = skippedChars.indexOf(dropped);
+                if (skippedIndex > -1) {
+                    skippedChars.splice(skippedIndex, 1);
+                }
+                
+                // remainingChars에서도 동일한 문자 모두 제거
+                remainingChars = remainingChars.filter(c => c !== dropped);
+                
+                // 카드 글자만 제거, 네모 틀 유지
+                document.getElementById('cardArea').innerHTML = '';
+                
+                // 모든 문자를 완료했는지 체크
+                if (completedChars === totalChars) {
+                    stopTimer();
+                    const minutes = Math.floor(timerSeconds / 60);
+                    const seconds = timerSeconds % 60;
+                    setTimeout(() => {
+                        alert(`🎉 완료! 소요 시간: ${minutes}분 ${seconds}초`);
+                    }, 300);
+                } else {
+                    // 다음 카드 표시
+                    showNextCard();
+                }
+            } else {
+                // 틀린 글자는 wrongChars에 추가
+                if (!wrongChars.includes(dropped)) {
+                    wrongChars.push(dropped);
+                }
+                targetCell.classList.add('wrong-flash');
+                setTimeout(() => targetCell.classList.remove('wrong-flash'), 350);
+            }
+        }
+        
+        // ─── 패스 버튼 클릭 시 현재 글자를 skippedChars에 추가 ───
+        function skipCurrentChar() {
+            // 첫 번째 클릭 시 타이머 시작
+            if (!timerStarted) {
+                startTimer();
+            }
+            
+            const currentCard = document.querySelector('.char-item');
+            if (currentCard) {
+                const char = currentCard.dataset.char;
+                if (!skippedChars.includes(char)) {
+                    skippedChars.push(char);
+                }
+            }
+            // 카드가 있든 없든 다음 카드 표시
+            showNextCard();
+        }
+        
+        // ─── 초기화 함수 ───
+        function resetGame() {
+            // 모든 배치된 글자 제거
+            Object.values(gridCells).forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('filled');
+                delete cell.dataset.placed;
+            });
+            
+            // 배열 초기화
+            skippedChars = [];
+            wrongChars = [];
+            remainingChars = [];
+            completedChars = 0;
+            
+            // 타이머 초기화
+            resetTimer();
+            
+            // 카드 영역 비우기
+            document.getElementById('cardArea').innerHTML = '';
+            
+            // 문자 재초기화
+            initializeCharacters();
+            
+            alert('초기화되었습니다! 🔄\n손가락 버튼을 눌러 시작하세요.');
+        }
+
+        // ─── 시작 ───
+        document.getElementById('shuffleBtn').addEventListener('click', skipCurrentChar);
+        document.getElementById('resetBtn').addEventListener('click', resetGame);
+
+        initializeConsonants();
+        initializeTable();
+        initializeCharacters();
+        // 첫 카드는 손가락 버튼을 눌렀을 때 표시
+    </script>
+</body>
+</html>
