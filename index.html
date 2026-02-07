@@ -275,12 +275,12 @@
             transition: background 0.2s, transform 0.15s;
             box-shadow: 0 4px 0 #d08838, 0 6px 15px rgba(240,160,80,0.4);
         }
-
+        
         .shuffle-btn:hover {
             background: #e08a3a;
-            transform: scale(1.08);
+            transform: scale(1.05);
         }
-
+        
         .shuffle-btn:active {
             transform: scale(0.95);
         }
@@ -294,84 +294,156 @@
         </div>
 
         <div class="content">
+            <!-- 왼쪽: 히라가나 테이블 -->
             <div class="table-container">
+                <!-- 자음 행 -->
                 <div class="consonants" id="consonants"></div>
-                <div class="table-grid" id="tableGrid"></div>
+
+                <!-- 테이블 -->
+                <div class="table-grid" id="tableGrid">
+                    <!-- 모음 열 -->
+                    <div class="vowel-column" id="vowelColumn"></div>
+                    <!-- 나머지 열들이 여기 들어감 -->
+                </div>
             </div>
 
+            <!-- 오른쪽: 카드 + 버튼 -->
             <div class="right-section">
-                <button class="reset-btn" id="resetBtn">초기화</button>
+                <button class="reset-btn" id="resetBtn">RESET</button>
                 <div class="card-area" id="cardArea"></div>
-                <button class="shuffle-btn" id="shuffleBtn" title="패스 (나중에 다시)">👆</button>
+                <button class="shuffle-btn" id="shuffleBtn">👆</button>
             </div>
         </div>
     </div>
 
     <script>
+        // 사운드 생성 함수들
+        function playCorrectSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 523.25; // C5
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.2);
+        }
+
+        function playIncorrectSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 200; // Lower tone
+            oscillator.type = 'sawtooth';
+            
+            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.15);
+        }
+
+        function playCelebrationSound() {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const notes = [523.25, 659.25, 783.99, 1046.50]; // C, E, G, C
+            
+            notes.forEach((freq, index) => {
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+                
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+                
+                oscillator.frequency.value = freq;
+                oscillator.type = 'sine';
+                
+                const startTime = audioContext.currentTime + (index * 0.15);
+                gainNode.gain.setValueAtTime(0.3, startTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
+                
+                oscillator.start(startTime);
+                oscillator.stop(startTime + 0.4);
+            });
+        }
+
+        // ─── 히라가나 50음도표 데이터 ───
         const hiragana = {
-            consonants: ['A','K','S','T','N','H','M','Y','R','W',''],
-            vowels: ['a','i','u','e','o'],
+            vowels: ['A', 'I', 'U', 'E', 'O'],
+            consonants: ['A', 'K', 'S', 'T', 'N', 'H', 'M', 'Y', 'R', 'W', ''],
             chars: {
-                'A': ['あ','い','う','え','お'],
-                'K': ['か','き','く','け','こ'],
-                'S': ['さ','し','す','せ','そ'],
-                'T': ['た','ち','つ','て','と'],
-                'N': ['な','に','ぬ','ね','の'],
-                'H': ['は','ひ','ふ','へ','ほ'],
-                'M': ['ま','み','む','め','も'],
-                'Y': ['や','','ゆ','','よ'],
-                'R': ['ら','り','る','れ','ろ'],
-                'W': ['わ','','','','を'],
-                '':  ['','','','','ん']
+                'A': ['あ', 'い', 'う', 'え', 'お'],
+                'K': ['か', 'き', 'く', 'け', 'こ'],
+                'S': ['さ', 'し', 'す', 'せ', 'そ'],
+                'T': ['た', 'ち', 'つ', 'て', 'と'],
+                'N': ['な', 'に', 'ぬ', 'ね', 'の'],
+                'H': ['は', 'ひ', 'ふ', 'へ', 'ほ'],
+                'M': ['ま', 'み', 'む', 'め', 'も'],
+                'Y': ['や', '', 'ゆ', '', 'よ'],
+                'R': ['ら', 'り', 'る', 'れ', 'ろ'],
+                'W': ['わ', '', '', '', 'を'],
+                '':  ['', '', '', '', 'ん']
             }
         };
 
-        let draggedElement = null;
-        let remainingChars  = [];
-        let gridCells       = {};
-        let selectedCard    = null;
-        let skippedChars    = [];  // 패스한 글자들
-        let wrongChars      = [];  // 틀린 글자들
-        let timerInterval   = null;  // 타이머 인터벌
-        let timerSeconds    = 0;     // 경과 시간 (초)
-        let timerStarted    = false; // 타이머 시작 여부
-        let totalChars      = 0;     // 전체 문자 개수
-        let completedChars  = 0;     // 완료한 문자 개수
+        let remainingChars = [];
+        let skippedChars   = [];
+        let wrongChars     = [];
+        let completedChars = 0;
+        let totalChars     = 0;
 
-        // ─── 초기화 ───
+        let selectedCard   = null;
+        let draggedElement = null;
+
+        let timerInterval  = null;
+        let timerSeconds   = 0;
+        let timerStarted   = false;
+
+        const gridCells = {};
+
         function initializeConsonants() {
-            const container = document.getElementById('consonants');
+            const cRow = document.getElementById('consonants');
             hiragana.consonants.forEach(c => {
-                const el = document.createElement('div');
-                el.className = 'consonant' + (c === '' ? ' empty' : '');
-                el.textContent = c;
-                container.appendChild(el);
+                const div = document.createElement('div');
+                div.className = 'consonant';
+                if (c === '') {
+                    div.classList.add('empty');
+                } else {
+                    div.textContent = c;
+                }
+                cRow.appendChild(div);
             });
         }
 
         function initializeTable() {
             const grid = document.getElementById('tableGrid');
+            const vCol = document.getElementById('vowelColumn');
 
-            const vowelCol = document.createElement('div');
-            vowelCol.className = 'vowel-column';
             hiragana.vowels.forEach(v => {
-                const el = document.createElement('div');
-                el.className = 'vowel';
-                el.textContent = v;
-                vowelCol.appendChild(el);
+                const div = document.createElement('div');
+                div.className = 'vowel';
+                div.textContent = v;
+                vCol.appendChild(div);
             });
-            grid.appendChild(vowelCol);
 
             hiragana.consonants.forEach(con => {
                 const col = document.createElement('div');
                 col.className = 'cells-column';
-
-                hiragana.vowels.forEach((_, vi) => {
-                    const char = hiragana.chars[con][vi];
+                hiragana.chars[con].forEach(char => {
                     const cell = document.createElement('div');
                     cell.className = 'cell';
 
-                    if (char) {
+                    if (char && char !== '') {
                         cell.dataset.correct = char;
                         cell.addEventListener('dragover',  handleDragOver);
                         cell.addEventListener('dragleave', handleDragLeave);
@@ -391,7 +463,7 @@
         function initializeCharacters() {
             const all = [];
             hiragana.consonants.forEach(con => {
-                hiragana.chars[con].forEach(c => { if (c) all.push(c); });
+                hiragana.chars[con].forEach(c => { if (c && c !== '') all.push(c); });
             });
             for (let i = all.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -541,6 +613,9 @@
             const correct = targetCell.dataset.correct;
 
             if (dropped === correct) {
+                // 정답 시 소리 재생
+                playCorrectSound();
+                
                 targetCell.textContent    = dropped;
                 targetCell.classList.add('filled');
                 targetCell.dataset.placed = dropped;
@@ -565,6 +640,8 @@
                 // 모든 문자를 완료했는지 체크
                 if (completedChars === totalChars) {
                     stopTimer();
+                    // 완료 시 축하 소리 재생
+                    playCelebrationSound();
                     const minutes = Math.floor(timerSeconds / 60);
                     const seconds = timerSeconds % 60;
                     setTimeout(() => {
@@ -575,6 +652,9 @@
                     showNextCard();
                 }
             } else {
+                // 오답 시 틀린 소리 재생
+                playIncorrectSound();
+                
                 // 틀린 글자는 wrongChars에 추가
                 if (!wrongChars.includes(dropped)) {
                     wrongChars.push(dropped);
